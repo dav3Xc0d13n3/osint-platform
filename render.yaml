@@ -1,0 +1,124 @@
+# Render Deployment Configuration
+# This file tells Render how to build and run the application
+
+services:
+  # Backend API Service
+  - type: web
+    name: osint-backend
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: osint-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: osint-redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: CORS_ORIGINS
+        value: "https://osint-frontend.onrender.com"
+      - key: API_V1_PREFIX
+        value: "/api/v1"
+      # Optional external API keys - add in Render dashboard
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: GOOGLE_CSE_ID
+        sync: false
+      - key: YANDEX_API_KEY
+        sync: false
+      - key: TINEYE_API_KEY
+        sync: false
+      - key: BING_API_KEY
+        sync: false
+      - key: VIRUSTOTAL_API_KEY
+        sync: false
+      - key: URLHAUS_API_KEY
+        sync: false
+      - key: ALIENVAULT_API_KEY
+        sync: false
+
+  # Celery Worker
+  - type: worker
+    name: osint-worker
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: osint-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: osint-redis
+          property: connectionString
+      - key: SECRET_KEY
+        fromService:
+          name: osint-backend
+          property: envVars.SECRET_KEY
+
+  # Celery Beat (scheduler)
+  - type: worker
+    name: osint-beat
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A app.tasks.celery_app beat --loglevel=info
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: osint-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: osint-redis
+          property: connectionString
+      - key: SECRET_KEY
+        fromService:
+          name: osint-backend
+          property: envVars.SECRET_KEY
+
+  # Frontend Static Site
+  - type: static
+    name: osint-frontend
+    region: oregon
+    plan: free
+    buildCommand: |
+      cd frontend
+      npm ci
+      npm run build
+    staticPublishPath: frontend/dist
+    pullRequestPreviewsEnabled: true
+    envVars:
+      - key: VITE_API_URL
+        value: "https://osint-backend.onrender.com/api/v1"
+
+databases:
+  - name: osint-db
+    databaseName: osint
+    user: osint
+    plan: free
+    region: oregon
+
+services:
+  - type: redis
+    name: osint-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru

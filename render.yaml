@@ -109,16 +109,16 @@ services:
       - key: VITE_API_URL
         value: "https://osint-backend.onrender.com/api/v1"
 
+  # Redis
+  - type: redis
+    name: osint-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
+
 databases:
   - name: osint-db
     databaseName: osint
     user: osint
     plan: free
     region: oregon
-
-services:
-  - type: redis
-    name: osint-redis
-    plan: free
-    region: oregon
-    maxmemoryPolicy: allkeys-lru

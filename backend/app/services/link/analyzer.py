@@ -2,6 +2,7 @@
 import asyncio
 import ssl
 import socket
+import re
 from datetime import datetime
 from typing import List, Dict, Optional
 from urllib.parse import urlparse, urljoin
@@ -9,12 +10,29 @@ from dataclasses import dataclass
 
 import httpx
 import dns.resolver
-import tldextract
 from bs4 import BeautifulSoup
 
 from app.core.config import get_settings
 
 settings = get_settings()
+
+
+def extract_domain(hostname: str) -> Optional[str]:
+    """Simple domain extraction without tldextract"""
+    if not hostname:
+        return None
+    # Remove port if present
+    hostname = hostname.split(':')[0]
+    # Split by dots
+    parts = hostname.split('.')
+    if len(parts) < 2:
+        return None
+    # Handle common TLDs and ccTLDs - take last 2 parts for most cases
+    # This is a simplified version - for production you'd want a proper public suffix list
+    if len(parts) >= 3 and len(parts[-2]) <= 3 and len(parts[-1]) <= 3:
+        # Possible ccTLD like .co.uk, .com.au
+        return '.'.join(parts[-3:])
+    return '.'.join(parts[-2:])
 
 
 @dataclass
@@ -369,8 +387,7 @@ async def analyze_link(
     if enumerate_subdomains_flag:
         try:
             parsed = urlparse(result["final_url"])
-            extracted = tldextract.extract(parsed.hostname)
-            domain = f"{extracted.domain}.{extracted.suffix}"
+            domain = extract_domain(parsed.hostname)
             if domain:
                 result["subdomains"] = await enumerate_subdomains(domain)
         except Exception:

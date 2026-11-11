@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useJobsStore } from '../stores/jobs'
-import { Loader2, CheckCircle, XCircle, Clock, Search, Image, Link2, ExternalLink, ChevronDown, ChevronUp, Copy, Check, Download, Shield, Globe } from 'lucide-react'
+import { Loader2, CheckCircle, XCircle, Clock, Search, Image, Link2, ExternalLink, ChevronDown, ChevronUp, Copy, Check, Download, Shield, Globe, Link as LinkIcon } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
@@ -230,7 +230,7 @@ export default function JobResults() {
           <details className="group" defaultOpen>
             <summary onClick={(e) => { e.preventDefault(); toggleSection('redirects') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
               <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <Link2 className="w-5 h-5" />
+                <LinkIcon className="w-5 h-5" />
                 Redirect Chain ({data.redirect_chain.length} hops)
               </span>
               <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.redirects && 'rotate-180')} />
@@ -241,7 +241,7 @@ export default function JobResults() {
                   <div key={i} className="card p-3 flex items-center gap-3">
                     <span className="w-6 text-center text-dark-400 font-mono">{i + 1}</span>
                     <div className="flex-1 min-w-0">
-                      <a href={hop.url} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 truncate block">{hop.url}</div>
+                      <a href={hop.url} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 truncate block">{hop.url}</a>
                       <div className="text-xs text-dark-500 dark:text-dark-400 flex items-center gap-2">
                         <span className={clsx('px-1.5 py-0.5 rounded text-xs', hop.status_code >= 400 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400')}>
                           {hop.status_code}
@@ -377,7 +377,7 @@ export default function JobResults() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(-1)} className="p-2 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-800">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></path></svg>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <div>
             <div className="flex items-center gap-2">

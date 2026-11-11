@@ -19,6 +19,7 @@ services:
         fromService:
           name: osint-redis
           property: connectionString
+          type: redis
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
@@ -61,6 +62,7 @@ services:
         fromService:
           name: osint-redis
           property: connectionString
+          type: redis
       - key: SECRET_KEY
         fromService:
           name: osint-backend
@@ -84,6 +86,7 @@ services:
         fromService:
           name: osint-redis
           property: connectionString
+          type: redis
       - key: SECRET_KEY
         fromService:
           name: osint-backend

@@ -29,6 +29,6 @@ requests==2.31.0
 beautifulsoup4==4.12.3
 lxml==5.2.1
 tldextract==5.1.2
-publicsuffix2==2.20240122
+publicsuffix2>=2.20240122
 dnslib==0.9.24
 cryptography==42.0.5

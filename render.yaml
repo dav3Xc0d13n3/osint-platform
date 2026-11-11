@@ -63,11 +63,6 @@ services:
           name: osint-redis
           property: connectionString
           type: redis
-      - key: SECRET_KEY
-        fromService:
-          name: osint-backend
-          property: envVars.SECRET_KEY
-          type: web
 
   # Celery Beat (scheduler)
   - type: worker
@@ -87,11 +82,6 @@ services:
           name: osint-redis
           property: connectionString
           type: redis
-      - key: SECRET_KEY
-        fromService:
-          name: osint-backend
-          property: envVars.SECRET_KEY
-          type: web
 
   # Frontend - Web Service serving static files
   - type: web

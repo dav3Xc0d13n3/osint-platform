@@ -61,6 +61,23 @@ export default function JobResults() {
     setTimeout(() => setCopiedField(null), 2000)
   }
 
+  const renderSection = (title: string, sectionKey: string, icon: React.ReactNode, children: React.ReactNode) => (
+    <details
+      className="group"
+      open={expandedSections[sectionKey] !== false}
+      onToggle={() => toggleSection(sectionKey)}
+    >
+      <summary className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+        <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
+          {icon}
+          {title}
+        </span>
+        <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections[sectionKey] && 'rotate-180')} />
+      </summary>
+      {expandedSections[sectionKey] !== false && <div className="mt-3">{children}</div>}
+    </details>
+  )
+
   const renderUsernameResults = (data: any) => {
     if (!data?.results) return null
 
@@ -85,34 +102,26 @@ export default function JobResults() {
           </div>
         </div>
 
-        {found.length > 0 && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('found') }} className="flex items-center justify-between cursor-pointer p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <span className="font-medium text-green-800 dark:text-green-300 flex items-center gap-2">
-                <CheckCircle className="w-5 h-5" />
-                Found Profiles ({found.length})
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.found && 'rotate-180')} />
-            </summary>
-            {expandedSections.found !== false && (
-              <div className="mt-3 space-y-2 max-h-96 overflow-y-auto">
-                {found.map((result: any, i: number) => (
-                  <div key={i} className="card p-3 flex items-center justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <a href={result.url} target="_blank" rel="noopener noreferrer" className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 truncate block">{result.platform}</a>
-                      <div className="text-xs text-dark-500 dark:text-dark-400 flex items-center gap-2 mt-1">
-                        {result.status_code && <span>HTTP {result.status_code}</span>}
-                        {result.response_time && <span>• {result.response_time}s</span>}
-                      </div>
-                    </div>
-                    <button onClick={() => copyToClipboard(result.url, `url-${i}`)} className="p-1 rounded hover:bg-dark-100 dark:hover:bg-dark-800">
-                      {copiedField === `url-${i}` ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                    </button>
+        {found.length > 0 && renderSection(
+          `Found Profiles (${found.length})`,
+          'found',
+          <CheckCircle className="w-5 h-5" />,
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {found.map((result: any, i: number) => (
+              <div key={i} className="card p-3 flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <a href={result.url} target="_blank" rel="noopener noreferrer" className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 truncate block">{result.platform}</a>
+                  <div className="text-xs text-dark-500 dark:text-dark-400 flex items-center gap-2 mt-1">
+                    {result.status_code && <span>HTTP {result.status_code}</span>}
+                    {result.response_time && <span>• {result.response_time}s</span>}
                   </div>
-                ))}
+                </div>
+                <button onClick={() => copyToClipboard(result.url, `url-${i}`)} className="p-1 rounded hover:bg-dark-100 dark:hover:bg-dark-800">
+                  {copiedField === `url-${i}` ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                </button>
               </div>
-            )}
-          </details>
+            ))}
+          </div>
         )}
       </div>
     )
@@ -123,99 +132,67 @@ export default function JobResults() {
 
     return (
       <div className="space-y-4">
-        {data.exif && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('exif') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-              <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <Image className="w-5 h-5" />
-                EXIF Metadata
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.exif && 'rotate-180')} />
-            </summary>
-            {expandedSections.exif !== false && (
-              <div className="mt-3 p-3 bg-dark-50 dark:bg-dark-800 rounded-lg font-mono text-sm max-h-64 overflow-y-auto">
-                <pre className="whitespace-pre-wrap">{JSON.stringify(data.exif, null, 2)}</pre>
-              </div>
-            )}
-          </details>
+        {data.exif && renderSection(
+          'EXIF Metadata',
+          'exif',
+          <Image className="w-5 h-5" />,
+          <div className="p-3 bg-dark-50 dark:bg-dark-800 rounded-lg font-mono text-sm max-h-64 overflow-y-auto">
+            <pre className="whitespace-pre-wrap">{JSON.stringify(data.exif, null, 2)}</pre>
+          </div>
         )}
 
-        {data.perceptual_hash && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('phash') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-              <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <Search className="w-5 h-5" />
-                Perceptual Hash
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.phash && 'rotate-180')} />
-            </summary>
-            {expandedSections.phash !== false && (
-              <div className="mt-3 p-3 bg-dark-50 dark:bg-dark-800 rounded-lg font-mono text-sm">
-                <code>{data.perceptual_hash}</code>
-                <button onClick={() => copyToClipboard(data.perceptual_hash, 'phash')} className="ml-2 p-1 rounded hover:bg-dark-200 dark:hover:bg-dark-700">
-                  {copiedField === 'phash' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+        {data.perceptual_hash && renderSection(
+          'Perceptual Hash',
+          'phash',
+          <Search className="w-5 h-5" />,
+          <div className="p-3 bg-dark-50 dark:bg-dark-800 rounded-lg font-mono text-sm">
+            <code>{data.perceptual_hash}</code>
+            <button onClick={() => copyToClipboard(data.perceptual_hash, 'phash')} className="ml-2 p-1 rounded hover:bg-dark-200 dark:hover:bg-dark-700">
+              {copiedField === 'phash' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+        )}
+
+        {data.face_matches && data.face_matches.length > 0 && renderSection(
+          `Face Matches (${data.face_matches.length})`,
+          'faces',
+          <span className="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">👤</span>,
+          <div className="space-y-2">
+            {data.face_matches.map((match: any, i: number) => (
+              <div key={i} className="card p-3 flex items-center gap-3">
+                {match.thumbnail && <img src={match.thumbnail} alt="" className="w-12 h-12 rounded-lg object-cover" />}
+                <div className="flex-1">
+                  <a href={match.profile_url} target="_blank" rel="noopener noreferrer" className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">{match.platform}</a>
+                  <div className="text-sm text-dark-500 dark:text-dark-400">Confidence: {(match.confidence * 100).toFixed(1)}%</div>
+                </div>
+                <button onClick={() => copyToClipboard(match.profile_url, `face-${i}`)} className="p-1 rounded hover:bg-dark-100 dark:hover:bg-dark-800">
+                  {copiedField === `face-${i}` ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
-            )}
-          </details>
+            ))}
+          </div>
         )}
 
-        {data.face_matches && data.face_matches.length > 0 && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('faces') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-              <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">👤</span>
-                Face Matches ({data.face_matches.length})
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.faces && 'rotate-180')} />
-            </summary>
-            {expandedSections.faces !== false && (
-              <div className="mt-3 space-y-2">
-                {data.face_matches.map((match: any, i: number) => (
-                  <div key={i} className="card p-3 flex items-center gap-3">
-                    {match.thumbnail && <img src={match.thumbnail} alt="" className="w-12 h-12 rounded-lg object-cover" />}
-                    <div className="flex-1">
-                      <a href={match.profile_url} target="_blank" rel="noopener noreferrer" className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">{match.platform}</a>
-                      <div className="text-sm text-dark-500 dark:text-dark-400">Confidence: {(match.confidence * 100).toFixed(1)}%</div>
-                    </div>
-                    <button onClick={() => copyToClipboard(match.profile_url, `face-${i}`)} className="p-1 rounded hover:bg-dark-100 dark:hover:bg-dark-800">
-                      {copiedField === `face-${i}` ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  </div>
-                ))}
+        {data.engine_results && Object.keys(data.engine_results).length > 0 && renderSection(
+          'Engine Results',
+          'engines',
+          <Globe className="w-5 h-5" />,
+          <div className="space-y-3">
+            {Object.entries(data.engine_results).map(([engine, results]: [string, any]) => (
+              <div key={engine} className="card p-3">
+                <h5 className="font-medium text-dark-900 dark:text-white capitalize mb-2">{engine} ({results.length} results)</h5>
+                <div className="space-y-2">
+                  {results.slice(0, 10).map((r: any, i: number) => (
+                    <a key={i} href={r.link} target="_blank" rel="noopener noreferrer" className="block p-2 rounded hover:bg-dark-100 dark:hover:bg-dark-800 text-sm">
+                      <div className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 truncate">{r.title}</div>
+                      <div className="text-dark-500 dark:text-dark-400 truncate">{r.link}</div>
+                      <div className="text-xs text-dark-400">{r.snippet}</div>
+                    </a>
+                  ))}
+                </div>
               </div>
-            )}
-          </details>
-        )}
-
-        {data.engine_results && Object.keys(data.engine_results).length > 0 && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('engines') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-              <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <Globe className="w-5 h-5" />
-                Engine Results
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.engines && 'rotate-180')} />
-            </summary>
-            {expandedSections.engines !== false && (
-              <div className="mt-3 space-y-3">
-                {Object.entries(data.engine_results).map(([engine, results]: [string, any]) => (
-                  <div key={engine} className="card p-3">
-                    <h5 className="font-medium text-dark-900 dark:text-white capitalize mb-2">{engine} ({results.length} results)</h5>
-                    <div className="space-y-2">
-                      {results.slice(0, 10).map((r: any, i: number) => (
-                        <a key={i} href={r.link} target="_blank" rel="noopener noreferrer" className="block p-2 rounded hover:bg-dark-100 dark:hover:bg-dark-800 text-sm">
-                          <div className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 truncate">{r.title}</div>
-                          <div className="text-dark-500 dark:text-dark-400 truncate">{r.link}</div>
-                          <div className="text-xs text-dark-400">{r.snippet}</div>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </details>
+            ))}
+          </div>
         )}
       </div>
     )
@@ -226,146 +203,98 @@ export default function JobResults() {
 
     return (
       <div className="space-y-4">
-        {data.redirect_chain && data.redirect_chain.length > 0 && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('redirects') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-              <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <LinkIcon className="w-5 h-5" />
-                Redirect Chain ({data.redirect_chain.length} hops)
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.redirects && 'rotate-180')} />
-            </summary>
-            {expandedSections.redirects !== false && (
-              <div className="mt-3 space-y-2">
-                {data.redirect_chain.map((hop: any, i: number) => (
-                  <div key={i} className="card p-3 flex items-center gap-3">
-                    <span className="w-6 text-center text-dark-400 font-mono">{i + 1}</span>
-                    <div className="flex-1 min-w-0">
-                      <a href={hop.url} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 truncate block">{hop.url}</a>
-                      <div className="text-xs text-dark-500 dark:text-dark-400 flex items-center gap-2">
-                        <span className={clsx('px-1.5 py-0.5 rounded text-xs', hop.status_code >= 400 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400')}>
-                          {hop.status_code}
-                        </span>
-                        <span>{hop.latency}s</span>
-                      </div>
-                    </div>
-                    <button onClick={() => copyToClipboard(hop.url, `redirect-${i}`)} className="p-1 rounded hover:bg-dark-100 dark:hover:bg-dark-800">
-                      {copiedField === `redirect-${i}` ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                    </button>
+        {data.redirect_chain && data.redirect_chain.length > 0 && renderSection(
+          `Redirect Chain (${data.redirect_chain.length} hops)`,
+          'redirects',
+          <LinkIcon className="w-5 h-5" />,
+          <div className="space-y-2">
+            {data.redirect_chain.map((hop: any, i: number) => (
+              <div key={i} className="card p-3 flex items-center gap-3">
+                <span className="w-6 text-center text-dark-400 font-mono">{i + 1}</span>
+                <div className="flex-1 min-w-0">
+                  <a href={hop.url} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 truncate block">{hop.url}</a>
+                  <div className="text-xs text-dark-500 dark:text-dark-400 flex items-center gap-2">
+                    <span className={clsx('px-1.5 py-0.5 rounded text-xs', hop.status_code >= 400 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400')}>
+                      {hop.status_code}
+                    </span>
+                    <span>{hop.latency}s</span>
                   </div>
-                ))}
+                </div>
+                <button onClick={() => copyToClipboard(hop.url, `redirect-${i}`)} className="p-1 rounded hover:bg-dark-100 dark:hover:bg-dark-800">
+                  {copiedField === `redirect-${i}` ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                </button>
               </div>
-            )}
-          </details>
+            ))}
+          </div>
         )}
 
-        {data.metadata && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('metadata') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-              <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <Search className="w-5 h-5" />
-                Page Metadata
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.metadata && 'rotate-180')} />
-            </summary>
-            {expandedSections.metadata !== false && (
-              <div className="mt-3 p-3 bg-dark-50 dark:bg-dark-800 rounded-lg font-mono text-sm max-h-64 overflow-y-auto">
-                <pre className="whitespace-pre-wrap">{JSON.stringify(data.metadata, null, 2)}</pre>
-              </div>
-            )}
-          </details>
+        {data.metadata && renderSection(
+          'Page Metadata',
+          'metadata',
+          <Search className="w-5 h-5" />,
+          <div className="p-3 bg-dark-50 dark:bg-dark-800 rounded-lg font-mono text-sm max-h-64 overflow-y-auto">
+            <pre className="whitespace-pre-wrap">{JSON.stringify(data.metadata, null, 2)}</pre>
+          </div>
         )}
 
-        {data.ssl && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('ssl') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-              <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                SSL Certificate
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.ssl && 'rotate-180')} />
-            </summary>
-            {expandedSections.ssl !== false && (
-              <div className="mt-3 p-3 bg-dark-50 dark:bg-dark-800 rounded-lg font-mono text-sm max-h-64 overflow-y-auto">
-                <pre className="whitespace-pre-wrap">{JSON.stringify(data.ssl, null, 2)}</pre>
-              </div>
-            )}
-          </details>
+        {data.ssl && renderSection(
+          'SSL Certificate',
+          'ssl',
+          <Shield className="w-5 h-5" />,
+          <div className="p-3 bg-dark-50 dark:bg-dark-800 rounded-lg font-mono text-sm max-h-64 overflow-y-auto">
+            <pre className="whitespace-pre-wrap">{JSON.stringify(data.ssl, null, 2)}</pre>
+          </div>
         )}
 
-        {data.subdomains && data.subdomains.length > 0 && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('subdomains') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-              <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <Globe className="w-5 h-5" />
-                Subdomains ({data.subdomains.length})
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.subdomains && 'rotate-180')} />
-            </summary>
-            {expandedSections.subdomains !== false && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {data.subdomains.slice(0, 50).map((sub: string, i: number) => (
-                  <span key={i} className="badge badge-info font-mono text-xs">{sub}</span>
-                ))}
-                {data.subdomains.length > 50 && <span className="badge badge-neutral">+{data.subdomains.length - 50} more</span>}
-              </div>
-            )}
-          </details>
+        {data.subdomains && data.subdomains.length > 0 && renderSection(
+          `Subdomains (${data.subdomains.length})`,
+          'subdomains',
+          <Globe className="w-5 h-5" />,
+          <div className="flex flex-wrap gap-2">
+            {data.subdomains.slice(0, 50).map((sub: string, i: number) => (
+              <span key={i} className="badge badge-info font-mono text-xs">{sub}</span>
+            ))}
+            {data.subdomains.length > 50 && <span className="badge badge-neutral">+{data.subdomains.length - 50} more</span>}
+          </div>
         )}
 
-        {data.archive_snapshots && data.archive_snapshots.length > 0 && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('archives') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-              <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                Archive Snapshots ({data.archive_snapshots.length})
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.archives && 'rotate-180')} />
-            </summary>
-            {expandedSections.archives !== false && (
-              <div className="mt-3 space-y-2">
-                {data.archive_snapshots.slice(0, 20).map((snap: string, i: number) => (
-                  <a key={i} href={snap} target="_blank" rel="noopener noreferrer" className="card p-3 flex items-center justify-between gap-3 hover:shadow-md transition-shadow">
-                    <span className="font-mono text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 truncate flex-1">{snap}</span>
-                    <ExternalLink className="w-4 h-4 text-dark-400" />
-                  </a>
-                ))}
-              </div>
-            )}
-          </details>
+        {data.archive_snapshots && data.archive_snapshots.length > 0 && renderSection(
+          `Archive Snapshots (${data.archive_snapshots.length})`,
+          'archives',
+          <Clock className="w-5 h-5" />,
+          <div className="space-y-2">
+            {data.archive_snapshots.slice(0, 20).map((snap: string, i: number) => (
+              <a key={i} href={snap} target="_blank" rel="noopener noreferrer" className="card p-3 flex items-center justify-between gap-3 hover:shadow-md transition-shadow">
+                <span className="font-mono text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 truncate flex-1">{snap}</span>
+                <ExternalLink className="w-4 h-4 text-dark-400" />
+              </a>
+            ))}
+          </div>
         )}
 
-        {data.threat_intel && data.threat_intel.length > 0 && (
-          <details className="group" defaultOpen>
-            <summary onClick={(e) => { e.preventDefault(); toggleSection('threats') }} className="flex items-center justify-between cursor-pointer p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-              <span className="font-medium text-primary-800 dark:text-primary-300 flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                Threat Intelligence
-              </span>
-              <ChevronDown className={clsx('w-5 h-5 transition-transform', expandedSections.threats && 'rotate-180')} />
-            </summary>
-            {expandedSections.threats !== false && (
-              <div className="mt-3 space-y-3">
-                {data.threat_intel.map((t: any, i: number) => (
-                  <div key={i} className="card p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-dark-900 dark:text-white">{t.source}</span>
-                      <span className={clsx('badge', t.malicious ? 'badge-danger' : 'badge-success')}>
-                        {t.malicious ? 'Malicious' : 'Clean'}
-                      </span>
-                    </div>
-                    {t.categories && t.categories.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {t.categories.map((c: string, j: number) => (
-                          <span key={j} className="badge badge-neutral text-xs">{c}</span>
-                        ))}
-                      </div>
-                    )}
+        {data.threat_intel && data.threat_intel.length > 0 && renderSection(
+          'Threat Intelligence',
+          'threats',
+          <Shield className="w-5 h-5" />,
+          <div className="space-y-3">
+            {data.threat_intel.map((t: any, i: number) => (
+              <div key={i} className="card p-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-dark-900 dark:text-white">{t.source}</span>
+                  <span className={clsx('badge', t.malicious ? 'badge-danger' : 'badge-success')}>
+                    {t.malicious ? 'Malicious' : 'Clean'}
+                  </span>
+                </div>
+                {t.categories && t.categories.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {t.categories.map((c: string, j: number) => (
+                      <span key={j} className="badge badge-neutral text-xs">{c}</span>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </details>
+            ))}
+          </div>
         )}
       </div>
     )

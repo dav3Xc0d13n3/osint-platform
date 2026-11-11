@@ -1,13 +1,10 @@
 import { useState } from 'react'
 import { useAuthStore } from '../stores/auth'
-import { useJobsStore } from '../stores/jobs'
-import { User, Key, Trash2, Plus, Loader2, Check, Bell, Shield, Palette, Moon, Sun, LogOut, Copy } from 'lucide-react'
+import { User, Key, Plus, Loader2, Check, Bell, Shield, Palette, Moon, LogOut, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { clsx } from 'clsx'
 
 export default function Settings() {
   const { user, apiKey, logout } = useAuthStore()
-  const { fetchJobs } = useJobsStore()
   const [newKeyName, setNewKeyName] = useState('')
   const [newKeyRateLimit, setNewKeyRateLimit] = useState('100/minute')
   const [newKeyExpires, setNewKeyExpires] = useState(30)

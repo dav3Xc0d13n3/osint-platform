@@ -1,14 +1,14 @@
 import { create } from 'zustand'
 import api from '../services/api'
-import type { JobResponse, JobStatusResponse, JobType, JobStatus } from '../types'
+import type { JobResponse, JobType, JobStatus } from '../types'
 
 interface JobsState {
   jobs: JobResponse[]
-  currentJob: JobStatusResponse | null
+  currentJob: JobResponse | null
   loading: boolean
   error: string | null
   fetchJobs: (params?: { type?: JobType; status?: JobStatus; limit?: number; offset?: number }) => Promise<void>
-  fetchJob: (id: string) => Promise<JobStatusResponse | null>
+  fetchJob: (id: string) => Promise<JobResponse | null>
   createJob: (jobType: JobType, inputData: Record<string, unknown>) => Promise<JobResponse | null>
   deleteJob: (id: string) => Promise<void>
   pollJob: (id: string, interval?: number) => Promise<void>

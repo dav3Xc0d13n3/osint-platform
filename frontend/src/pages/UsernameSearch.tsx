@@ -3,6 +3,7 @@ import { useJobsStore } from '../stores/jobs'
 import { useNavigate } from 'react-router-dom'
 import { Search, Loader2, User, Globe, HelpCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { clsx } from 'clsx'
 
 const POPULAR_PLATFORMS = [
   'GitHub', 'Twitter', 'Instagram', 'LinkedIn', 'Facebook', 'Reddit', 'YouTube', 'TikTok',
@@ -86,8 +87,9 @@ export default function UsernameSearch() {
         {/* Platform Selection */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300">
-              Platforms <HelpCircle className="w-4 h-4 inline text-dark-400" title="Leave empty to search all 300+ platforms" />
+            <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 flex items-center gap-1">
+              Platforms
+              <HelpCircle className="w-4 h-4 text-dark-400" aria-label="Leave empty to search all 300+ platforms" />
             </label>
             <button
               type="button"

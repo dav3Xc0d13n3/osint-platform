@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/auth'
-import { Search, Key, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import { Search, Key, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function Login() {

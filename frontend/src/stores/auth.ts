@@ -28,7 +28,7 @@ export const useAuthStore = create<AuthState>()(
       login: async (apiKey: string) => {
         api.defaults.headers.common['X-API-Key'] = apiKey
         try {
-          const res = await api.get('/jobs?limit=1')
+          await api.get('/jobs?limit=1')
           // If we get here, the key is valid
           // In a real app, you'd have a /me endpoint
           set({

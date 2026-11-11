@@ -134,10 +134,16 @@ export interface JobResponse {
 
 export interface JobStatusResponse {
   id: string
+  job_type: JobType
   status: JobStatus
+  input_data: Record<string, any>
   progress: number
   result_data?: Record<string, any>
   error_message?: string
+  created_at: string
+  started_at?: string
+  completed_at?: string
+  elapsed_time?: number
 }
 
 export interface APIKeyCreate {

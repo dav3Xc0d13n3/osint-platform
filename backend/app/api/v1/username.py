@@ -1,6 +1,6 @@
 # Username Enumeration API
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -14,7 +14,7 @@ from app.schemas.osint import (
     JobResponse,
     JobStatusResponse,
 )
-from app.tasks.username_tasks import enumerate_username_task
+from app.tasks.local_runner import run_username_job_bg
 
 router = APIRouter(prefix="/username", tags=["username"])
 
@@ -22,6 +22,7 @@ router = APIRouter(prefix="/username", tags=["username"])
 @router.post("/enumerate", response_model=JobResponse, status_code=status.HTTP_202_ACCEPTED)
 async def enumerate_username(
     request: UsernameEnumerateRequest,
+    background_tasks: BackgroundTasks,
     api_key = Depends(get_current_api_key),
     db: AsyncSession = Depends(get_db),
 ):
@@ -36,8 +37,8 @@ async def enumerate_username(
     await db.commit()
     await db.refresh(job)
 
-    # Queue background task
-    enumerate_username_task.delay(str(job.id))
+    # Queue background task (no Celery)
+    background_tasks.add_task(run_username_job_bg, str(job.id))
 
     return job
 

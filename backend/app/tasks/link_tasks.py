@@ -1,5 +1,4 @@
-# Link Analysis Tasks
-from celery import shared_task
+# Link Analysis Tasks (local runner compatible)
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import select
 import asyncio
@@ -14,9 +13,9 @@ task_engine = create_async_engine(settings.DATABASE_URL, pool_pre_ping=True)
 TaskSession = async_sessionmaker(task_engine, expire_on_commit=False)
 
 
-@shared_task(bind=True, max_retries=3)
-def link_analyze_task(self, job_id: str):
-    return asyncio.run(_link_analyze_async(job_id))
+async def run_link_job(job_id: str):
+    """Run link analysis job (called via BackgroundTasks)"""
+    await _link_analyze_async(job_id)
 
 
 async def _link_analyze_async(job_id: str):

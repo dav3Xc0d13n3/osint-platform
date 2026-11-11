@@ -25,9 +25,10 @@ services:
       - key: DEBUG
         value: "false"
       - key: CORS_ORIGINS
-        value: "https://osint-frontend.onrender.com"
+        value: "https://osint-frontend-gktj.onrender.com"
       - key: API_V1_PREFIX
         value: "/api/v1"
+      # Optional external API keys - add in Render dashboard
       - key: GOOGLE_API_KEY
         sync: false
       - key: GOOGLE_CSE_ID
@@ -45,55 +46,17 @@ services:
       - key: ALIENVAULT_API_KEY
         sync: false
 
-  # Celery Worker
-  - type: worker
-    name: osint-worker
-    runtime: python
-    region: oregon
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: osint-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: osint-redis
-          property: connectionString
-          type: redis
-
-  # Celery Beat (scheduler)
-  - type: worker
-    name: osint-beat
-    runtime: python
-    region: oregon
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: celery -A app.tasks.celery_app beat --loglevel=info
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: osint-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: osint-redis
-          property: connectionString
-          type: redis
-
-  # Frontend - Web Service serving static files
-  - type: web
+  # Frontend - Static Site
+  - type: static
     name: osint-frontend
-    runtime: node
     region: oregon
     plan: free
     buildCommand: |
       cd frontend
       npm install --no-audit --no-fund
       npm run build
-    startCommand: npx serve -s dist -l $PORT
+    staticPublishPath: frontend/dist
+    pullRequestPreviewsEnabled: true
     envVars:
       - key: VITE_API_URL
         value: "https://osint-backend.onrender.com/api/v1"

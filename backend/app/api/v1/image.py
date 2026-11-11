@@ -1,6 +1,6 @@
 # Image Search API
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import base64
@@ -14,7 +14,7 @@ from app.schemas.osint import (
     JobResponse,
     JobStatusResponse,
 )
-from app.tasks.image_tasks import image_search_task
+from app.tasks.local_runner import run_image_job_bg
 
 router = APIRouter(prefix="/image", tags=["image"])
 
@@ -29,6 +29,7 @@ async def search_image(
     extract_exif: bool = Form(True),
     extract_faces: bool = Form(True),
     perceptual_hash: bool = Form(True),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
     api_key = Depends(get_current_api_key),
     db: AsyncSession = Depends(get_db),
 ):
@@ -67,7 +68,8 @@ async def search_image(
     await db.commit()
     await db.refresh(job)
 
-    image_search_task.delay(str(job.id))
+    # Queue background task (no Celery)
+    background_tasks.add_task(run_image_job_bg, str(job.id))
 
     return job
 

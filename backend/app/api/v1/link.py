@@ -1,6 +1,6 @@
 # Link Analysis API
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -12,7 +12,7 @@ from app.schemas.osint import (
     JobResponse,
     JobStatusResponse,
 )
-from app.tasks.link_tasks import link_analyze_task
+from app.tasks.local_runner import run_link_job_bg
 
 router = APIRouter(prefix="/link", tags=["link"])
 
@@ -20,6 +20,7 @@ router = APIRouter(prefix="/link", tags=["link"])
 @router.post("/analyze", response_model=JobResponse, status_code=status.HTTP_202_ACCEPTED)
 async def analyze_link(
     request: LinkAnalyzeRequest,
+    background_tasks: BackgroundTasks,
     api_key = Depends(get_current_api_key),
     db: AsyncSession = Depends(get_db),
 ):
@@ -34,7 +35,8 @@ async def analyze_link(
     await db.commit()
     await db.refresh(job)
 
-    link_analyze_task.delay(str(job.id))
+    # Queue background task (no Celery)
+    background_tasks.add_task(run_link_job_bg, str(job.id))
 
     return job
 

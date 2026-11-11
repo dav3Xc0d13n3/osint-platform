@@ -1,5 +1,4 @@
-# Image Search Tasks
-from celery import shared_task
+# Image Search Tasks (local runner compatible)
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import select
 import asyncio
@@ -15,9 +14,9 @@ task_engine = create_async_engine(settings.DATABASE_URL, pool_pre_ping=True)
 TaskSession = async_sessionmaker(task_engine, expire_on_commit=False)
 
 
-@shared_task(bind=True, max_retries=3)
-def image_search_task(self, job_id: str):
-    return asyncio.run(_image_search_async(job_id))
+async def run_image_job(job_id: str):
+    """Run image search job (called via BackgroundTasks)"""
+    await _image_search_async(job_id)
 
 
 async def _image_search_async(job_id: str):

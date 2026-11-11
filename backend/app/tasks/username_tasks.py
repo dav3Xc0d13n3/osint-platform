@@ -1,12 +1,9 @@
-# Username Enumeration Tasks
-from celery import shared_task
+# Username Enumeration Tasks (local runner compatible)
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy import select, update
+from sqlalchemy import select
 import asyncio
-import json
 
 from app.core.config import get_settings
-from app.core.database import Base
 from app.models.job import Job, JobStatus
 from app.services.username.enumerator import enumerate_username
 
@@ -17,10 +14,9 @@ task_engine = create_async_engine(settings.DATABASE_URL, pool_pre_ping=True)
 TaskSession = async_sessionmaker(task_engine, expire_on_commit=False)
 
 
-@shared_task(bind=True, max_retries=3)
-def enumerate_username_task(self, job_id: str):
-    """Celery task for username enumeration"""
-    return asyncio.run(_enumerate_username_async(job_id))
+async def run_username_job(job_id: str):
+    """Run username enumeration job (called via BackgroundTasks)"""
+    await _enumerate_username_async(job_id)
 
 
 async def _enumerate_username_async(job_id: str):

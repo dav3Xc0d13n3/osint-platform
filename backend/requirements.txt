@@ -20,11 +20,11 @@ slowapi==0.1.9
 # OSINT Libraries
 sherlock-project==0.16.2
 exifread==3.0.0
-pillow==10.3.0
+pillow==11.0.0
 imagehash==4.3.1
 face-recognition==1.3.0
-opencv-python-headless==4.9.0.80
-numpy==1.26.4
+opencv-python-headless==4.10.0.84
+numpy==2.1.0
 requests==2.31.0
 beautifulsoup4==4.12.3
 lxml==5.2.1

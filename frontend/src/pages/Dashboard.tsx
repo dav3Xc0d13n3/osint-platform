@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useJobsStore } from '../stores/jobs'
 import { useAuthStore } from '../stores/auth'
-import { Search, Image, Link2, Clock, CheckCircle, XCircle, AlertCircle, Loader2, Plus, ExternalLink } from 'lucide-react'
+import { Search, Image, Link2, Clock, CheckCircle, XCircle, Loader2, Plus, ExternalLink } from 'lucide-react'
 import { clsx } from 'clsx'
 import { formatDistanceToNow } from 'date-fns'
 

@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/auth'
-import { LayoutDashboard, Search, Image, Link2, Settings, LogOut, Menu, X, ChevronLeft } from 'lucide-react'
+import { LayoutDashboard, Search, Image, Link2, Settings, LogOut, Menu, ChevronLeft } from 'lucide-react'
 import { useState } from 'react'
 import { clsx } from 'clsx'
 

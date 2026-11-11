@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useJobsStore } from '../stores/jobs'
-import { Loader2, CheckCircle, XCircle, Clock, Search, Image, Link2, ExternalLink, ChevronDown, ChevronUp, Copy, Check, Download, Shield, Globe, Link as LinkIcon } from 'lucide-react'
+import { Loader2, CheckCircle, XCircle, Clock, Search, Image, Link2, ExternalLink, ChevronDown, Copy, Check, Download, Shield, Globe, Link as LinkIcon } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
 
 const jobTypeConfig = {

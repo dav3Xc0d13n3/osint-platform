@@ -130,6 +130,7 @@ export interface JobResponse {
   created_at: string
   started_at?: string
   completed_at?: string
+  elapsed_time?: number
 }
 
 export interface JobStatusResponse {

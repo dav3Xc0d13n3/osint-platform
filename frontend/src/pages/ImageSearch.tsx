@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { useJobsStore } from '../stores/jobs'
 import { useNavigate } from 'react-router-dom'
-import { Image, Loader2, Upload, Camera, Search, X, CheckCircle, HelpCircle } from 'lucide-react'
+import { Image, Loader2, Upload, Camera, Search, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
 
@@ -180,7 +180,10 @@ export default function ImageSearch() {
               ref={fileInputRef}
               type="file"
               accept={ALLOWED_TYPES.join(',')}
-              onChange={(e) => handleFileSelect(e.target.files[0])}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleFileSelect(file)
+              }}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               disabled={loading || !!imageUrl}
             />

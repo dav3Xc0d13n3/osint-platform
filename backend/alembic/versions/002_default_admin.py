@@ -27,6 +27,28 @@ if DEFAULT_ADMIN_PASSWORD == "admin":
     logging.warning("Using default admin password 'admin'. Set ADMIN_PASSWORD env var in production!")
 
 def upgrade() -> None:
+    # Ensure admin_users table exists (handles fresh DB and partially migrated DB)
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    if not inspector.has_table("admin_users"):
+        logging.info("admin_users table missing, creating it now")
+        op.create_table(
+            'admin_users',
+            sa.Column('id', UUID(as_uuid=True), primary_key=True),
+            sa.Column('username', sa.String(50), unique=True, nullable=False),
+            sa.Column('email', sa.String(100), unique=True, nullable=False),
+            sa.Column('password_hash', sa.String(255), nullable=False),
+            sa.Column('full_name', sa.String(100), nullable=True),
+            sa.Column('is_active', sa.Boolean(), default=True, nullable=False),
+            sa.Column('is_superuser', sa.Boolean(), default=False, nullable=False),
+            sa.Column('last_login', sa.DateTime(timezone=True), nullable=True),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+            sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False),
+        )
+        op.create_index('ix_admin_users_username', 'admin_users', ['username'], if_not_exists=True)
+        op.create_index('ix_admin_users_email', 'admin_users', ['email'], if_not_exists=True)
+        logging.info("Created admin_users table")
+    
     # Check if admin user already exists
     conn = op.get_bind()
     result = conn.execute(sa.text("SELECT 1 FROM admin_users WHERE username = 'admin'"))

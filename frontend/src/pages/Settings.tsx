@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../stores/auth'
 import { User, Key, Plus, Loader2, Check, Bell, Shield, Palette, Moon, LogOut, Copy, Trash2, Sparkles, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { api } from '../services/api'
+import clsx from 'clsx'
+import { apiInstance as api } from '../services/api'
 
 export default function Settings() {
   const { user, apiKey, logout } = useAuthStore()
@@ -35,6 +36,16 @@ export default function Settings() {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
     exit: { opacity: 0 },
+  }
+
+  const listVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
+  }
+
+  const listItemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] } },
   }
 
   const handleCreateKey = async () => {

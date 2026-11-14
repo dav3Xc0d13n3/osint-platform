@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../stores/auth'
-import { Search, Key, Loader2, Eye, EyeOff, Shield, Sparkles, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react'
+import { Search, Key, Loader2, Eye, EyeOff, Shield, Sparkles, ArrowRight, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { api } from '../services/api'
+import { apiInstance as api } from '../services/api'
 
 export default function Login() {
   const navigate = useNavigate()

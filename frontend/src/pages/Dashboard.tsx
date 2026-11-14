@@ -255,7 +255,7 @@ export default function Dashboard() {
               variants={listVariants}
               className="divide-y divide-dark-200 dark:divide-dark-700"
             >
-              {recentJobs.map((job, index) => {
+              {recentJobs.map((job, _index) => {
                 const typeCfg = jobTypeConfig[job.job_type]
                 const statusCfg = statusConfig[job.status]
                 const TypeIcon = typeCfg.icon

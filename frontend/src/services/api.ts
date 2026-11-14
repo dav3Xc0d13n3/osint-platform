@@ -22,4 +22,5 @@ api.interceptors.response.use(
   }
 )
 
+export const apiInstance = api
 export default api

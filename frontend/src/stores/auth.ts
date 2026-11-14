@@ -5,12 +5,14 @@ import api from '../services/api'
 interface User {
   id: string
   name: string
+  username: string
   keyPrefix: string
   rateLimit: string
 }
 
 interface AdminUser {
   id: string
+  name: string
   username: string
   email: string
   fullName?: string
@@ -54,6 +56,7 @@ export const useAuthStore = create<AuthState>()(
             user: {
               id: 'current',
               name: 'API User',
+              username: 'api_user',
               keyPrefix: apiKey.slice(0, 12),
               rateLimit: '100/minute',
             },
@@ -70,11 +73,12 @@ export const useAuthStore = create<AuthState>()(
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`
         delete api.defaults.headers.common['X-API-Key']
         localStorage.setItem('osint-admin-token', token)
+        const adminWithName = { ...admin, name: admin.name || admin.fullName || admin.username }
         set({
           isAuthenticated: true,
           authType: 'admin',
           adminToken: token,
-          admin,
+          admin: adminWithName,
           apiKey: null,
           user: null,
         })

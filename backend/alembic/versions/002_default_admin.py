@@ -59,26 +59,34 @@ def upgrade() -> None:
     # Hash the password
     hashed_password = pwd_context.hash(DEFAULT_ADMIN_PASSWORD)
     
-    # Insert default admin user
-    op.execute(
+    # Insert default admin user using connection directly with bind parameters
+    conn.execute(
         sa.text("""
             INSERT INTO admin_users (id, username, email, password_hash, full_name, is_active, is_superuser, created_at, updated_at)
             VALUES (
                 gen_random_uuid(),
-                'admin',
-                'admin@example.com',
+                :username,
+                :email,
                 :password_hash,
-                'Default Admin',
-                true,
-                true,
+                :full_name,
+                :is_active,
+                :is_superuser,
                 now(),
                 now()
             )
             ON CONFLICT (username) DO NOTHING
         """),
-        {"password_hash": hashed_password}
+        {
+            "username": "admin",
+            "email": "admin@example.com",
+            "password_hash": hashed_password,
+            "full_name": "Default Admin",
+            "is_active": True,
+            "is_superuser": True,
+        }
     )
     logging.info("Default admin user 'admin' created successfully")
 
 def downgrade() -> None:
-    op.execute("DELETE FROM admin_users WHERE username = 'admin'")
+    conn = op.get_bind()
+    conn.execute(sa.text("DELETE FROM admin_users WHERE username = 'admin'"))

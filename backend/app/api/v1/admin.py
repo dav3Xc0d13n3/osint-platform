@@ -1,6 +1,6 @@
 # Admin Authentication API
 from datetime import datetime, timedelta, UTC
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -19,8 +19,8 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.post("/login")
 async def admin_login(
-    username: str,
-    password: str,
+    username: str = Body(...),
+    password: str = Body(...),
     db: AsyncSession = Depends(get_db),
 ):
     """Admin login with username and password"""

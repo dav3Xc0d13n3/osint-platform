@@ -5,6 +5,7 @@ from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
+from urllib.parse import urlparse, urlunparse
 
 # Import models
 from app.core.database import Base
@@ -12,10 +13,38 @@ from app.models import api_key, job  # noqa
 
 config = context.config
 
-# Override sqlalchemy.url from environment
+
+def _normalize_db_url(url: str) -> str:
+    """Normalize DATABASE_URL to use asyncpg driver for async SQLAlchemy.
+    
+    Render provides postgresql:// or postgres:// URLs. We need postgresql+asyncpg://
+    for create_async_engine. Preserve all other components including SSL params.
+    """
+    if not url or not isinstance(url, str):
+        return url
+    
+    parsed = urlparse(url.strip())
+    scheme = parsed.scheme.lower()
+    
+    if scheme in ("postgres", "postgresql"):
+        new_scheme = "postgresql+asyncpg"
+        normalized = urlunparse((
+            new_scheme,
+            parsed.netloc,
+            parsed.path,
+            parsed.params,
+            parsed.query,
+            parsed.fragment
+        ))
+        return normalized
+    
+    return url
+
+
+# Override sqlalchemy.url from environment (with scheme normalization)
 db_url = os.getenv("DATABASE_URL")
 if db_url:
-    config.set_main_option("sqlalchemy.url", db_url)
+    config.set_main_option("sqlalchemy.url", _normalize_db_url(db_url))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

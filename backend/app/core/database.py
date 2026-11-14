@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import get_settings
-from app.models import api_key, job, admin  # noqa: F401 - import models to register with Base
 
 settings = get_settings()
 
@@ -33,5 +32,7 @@ async def get_db() -> AsyncSession:
 
 
 async def init_db() -> None:
+    # Import models here to register them with Base.metadata
+    from app.models import api_key, job, admin  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

@@ -7,9 +7,9 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from urllib.parse import urlparse, urlunparse
 
-# Import models
+# Import models after Base to avoid circular imports
 from app.core.database import Base
-from app.models import api_key, job  # noqa
+from app.models import api_key, job, admin  # noqa: F401
 
 config = context.config
 

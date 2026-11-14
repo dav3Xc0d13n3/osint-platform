@@ -1,12 +1,22 @@
 import { useState, useCallback, useRef } from 'react'
+import { motion } from 'framer-motion'
 import { useJobsStore } from '../stores/jobs'
 import { useNavigate } from 'react-router-dom'
-import { Image, Loader2, Upload, Camera, Search, X } from 'lucide-react'
+import { Image, Loader2, Upload, Camera, Search, X, Zap, Target, Shield, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
+import { NeonButton, GlassCard, StaggerContainer, StaggerItem } from '../components/ui'
+import { itemVariants, cardVariants, containerVariants, listVariants } from '../lib/motion'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+
+const engineOptions = [
+  { id: 'google', name: 'Google Images', requiresKey: true },
+  { id: 'yandex', name: 'Yandex Images', requiresKey: true },
+  { id: 'tineye', name: 'TinEye', requiresKey: true },
+  { id: 'bing', name: 'Bing Visual Search', requiresKey: true },
+]
 
 export default function ImageSearch() {
   const navigate = useNavigate()
@@ -26,12 +36,12 @@ export default function ImageSearch() {
     if (!selectedFile) return
 
     if (!ALLOWED_TYPES.includes(selectedFile.type)) {
-      toast.error('Invalid file type. Use JPEG, PNG, WebP, or GIF')
+      toast.error('Invalid file type. Use JPEG, PNG, WebP, or GIF', { icon: '⚠️' })
       return
     }
 
     if (selectedFile.size > MAX_FILE_SIZE) {
-      toast.error('File too large. Maximum 10MB')
+      toast.error('File too large. Maximum 10MB', { icon: '⚠️' })
       return
     }
 
@@ -68,7 +78,7 @@ export default function ImageSearch() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!file && !imageUrl.trim()) {
-      toast.error('Please provide an image URL or upload a file')
+      toast.error('Please provide an image URL or upload a file', { icon: '⚠️' })
       return
     }
 
@@ -82,7 +92,6 @@ export default function ImageSearch() {
       }
 
       if (file) {
-        // Convert to base64
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader()
           reader.onload = () => resolve(reader.result as string)
@@ -96,46 +105,77 @@ export default function ImageSearch() {
 
       const job = await createJob('image', inputData)
       if (job) {
-        toast.success('Search started')
+        toast.success('Search started', { icon: '🖼️' })
         navigate(`/jobs/${job.id}`)
       }
     } catch {
-      toast.error('Failed to start search')
+      toast.error('Failed to start search', { icon: '⚠️' })
     } finally {
       setLoading(false)
     }
   }
 
-  const engineOptions = [
-    { id: 'google', name: 'Google Images', requiresKey: true },
-    { id: 'yandex', name: 'Yandex Images', requiresKey: true },
-    { id: 'tineye', name: 'TinEye', requiresKey: true },
-    { id: 'bing', name: 'Bing Visual Search', requiresKey: true },
-  ]
-
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <motion.div
+      className="max-w-3xl mx-auto space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-dark-900 dark:text-white flex items-center gap-2">
-          <Image className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-          Image Search
-        </h1>
-        <p className="text-dark-500 dark:text-dark-400 mt-1">Reverse image search with EXIF extraction, face matching & perceptual hashing</p>
-      </div>
+      <motion.div variants={itemVariants}>
+        <motion.div className="flex items-center gap-3 mb-2">
+          <motion.div
+            className="w-12 h-12 rounded-xl flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, var(--accent-green) 0%, var(--accent-cyan) 100%)' }}
+            whileHover={{ scale: 1.05, rotate: 3 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Image className="w-7 h-7 text-white" />
+          </motion.div>
+          <div>
+            <motion.h1 className="heading-2">Image Search</motion.h1>
+            <motion.p className="text-[var(--text-secondary)] mt-1">Reverse image search with EXIF, face matching & perceptual hashing</motion.p>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Stats Bar */}
+      <motion.div variants={itemVariants} className="grid grid-cols-4 gap-3">
+        <GlassCard variant="bordered" padding="sm" className="text-center">
+          <div className="text-2xl font-mono font-bold text-green-400">4</div>
+          <div className="text-xs text-[var(--text-muted)]">Engines</div>
+        </GlassCard>
+        <GlassCard variant="bordered" padding="sm" className="text-center">
+          <div className="text-2xl font-mono font-bold text-cyan-400">10MB</div>
+          <div className="text-xs text-[var(--text-muted)]">Max Size</div>
+        </GlassCard>
+        <GlassCard variant="bordered" padding="sm" className="text-center">
+          <div className="text-2xl font-mono font-bold text-purple-400">pHash</div>
+          <div className="text-xs text-[var(--text-muted)]">Hashing</div>
+        </GlassCard>
+        <GlassCard variant="bordered" padding="sm" className="text-center">
+          <div className="text-2xl font-mono font-bold text-orange-400">EXIF</div>
+          <div className="text-xs text-[var(--text-muted)]">Metadata</div>
+        </GlassCard>
+      </motion.div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="card p-6 space-y-6">
+      <motion.form
+        onSubmit={handleSubmit}
+        variants={itemVariants}
+        className="glass-card p-6 space-y-6"
+      >
         {/* Image Input - URL or Upload */}
-        <div>
-          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
-            Image <span className="text-red-500">*</span>
+        <motion.div variants={itemVariants}>
+          <label className="block text-sm font-medium text-[var(--text-secondary)] mb-3 flex items-center gap-1">
+            Image <span className="text-red-400">*</span>
           </label>
 
           {/* URL Input */}
-          <div className="mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+          <motion.div className="mb-4">
+            <motion.div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" aria-hidden="true" />
               <input
                 type="url"
                 value={imageUrl}
@@ -146,34 +186,34 @@ export default function ImageSearch() {
                     setPreview(null)
                   }
                 }}
-                className="input pl-10"
+                className="neon-input pl-10"
                 placeholder="https://example.com/image.jpg"
                 disabled={loading || !!file}
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Or divider */}
-          <div className="relative mb-4">
+          <motion.div className="relative mb-4">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-dark-200 dark:border-dark-700" />
+              <div className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-dark-900 text-dark-500 dark:text-dark-400">OR</span>
+              <span className="px-2 bg-[var(--bg-primary)] text-[var(--text-muted)]">OR</span>
             </div>
-          </div>
+          </motion.div>
 
           {/* File Upload Dropzone */}
-          <div
+          <motion.div
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             className={clsx(
-              'relative border-2 border-dashed rounded-xl p-6 text-center transition-colors',
+              'relative border-2 border-dashed rounded-xl p-6 text-center transition-all duration-200',
               dragActive
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-dark-300 dark:border-dark-600 hover:border-primary-400',
-              file && 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                ? 'border-green-500 bg-green-500/10'
+                : 'border-white/10 hover:border-green-400/50',
+              file && 'border-green-500 bg-green-500/10'
             )}
           >
             <input
@@ -189,145 +229,177 @@ export default function ImageSearch() {
             />
 
             {file && preview ? (
-              <div className="relative max-w-xs mx-auto">
-                <img src={preview} alt="Preview" className="rounded-lg max-h-64 object-contain" />
-                <button
+              <motion.div className="relative max-w-xs mx-auto">
+                <motion.img
+                  src={preview}
+                  alt="Preview"
+                  className="rounded-lg max-h-64 object-contain"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <motion.button
                   type="button"
                   onClick={clearFile}
-                  className="absolute top-2 right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label="Remove image"
                 >
                   <X className="w-4 h-4" />
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
             ) : (
-              <>
-                <Upload className="w-12 h-12 text-dark-400 mx-auto mb-3" />
-                <p className="text-dark-600 dark:text-dark-400 mb-1">Drop an image or click to browse</p>
-                <p className="text-sm text-dark-500 dark:text-dark-500">JPEG, PNG, WebP, GIF • Max 10MB</p>
-              </>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Upload className="w-14 h-14 text-[var(--text-muted)] mx-auto mb-3" />
+                <motion.p className="text-[var(--text-secondary)] mb-1">Drop an image or click to browse</motion.p>
+                <motion.p className="text-sm text-[var(--text-muted)]">JPEG, PNG, WebP, GIF • Max 10MB</motion.p>
+              </motion.div>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Search Engines */}
-        <div>
-          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
-            Search Engines
-          </label>
-          <div className="grid grid-cols-2 gap-3">
+        <motion.div variants={itemVariants}>
+          <label className="block text-sm font-medium text-[var(--text-secondary)] mb-3">Search Engines</label>
+          <StaggerContainer className="grid grid-cols-2 gap-3" staggerChildren={0.05}>
             {engineOptions.map((engine) => (
-              <label key={engine.id} className={clsx(
-                'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
-                engines.includes(engine.id)
-                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                  : 'border-dark-200 dark:border-dark-600 hover:border-primary-300 dark:hover:border-primary-700'
-              )}>
-                <input
-                  type="checkbox"
-                  checked={engines.includes(engine.id)}
-                  onChange={(e) => setEngines(e.target.checked ? [...engines, engine.id] : engines.filter((id) => id !== engine.id))}
-                  className="w-4 h-4 text-primary-600 border-dark-300 rounded focus:ring-primary-500"
-                />
-                <div className="flex-1">
-                  <span className="font-medium text-dark-900 dark:text-white">{engine.name}</span>
-                  {engine.requiresKey && (
-                    <span className="ml-2 text-xs text-yellow-600 dark:text-yellow-400">(requires API key)</span>
+              <StaggerItem key={engine.id}>
+                <motion.label
+                  className={clsx(
+                    'flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200',
+                    engines.includes(engine.id)
+                      ? 'border-green-500/50 bg-green-500/10 shadow-[0_0_20px_rgba(34,255,136,0.1)]'
+                      : 'border-white/10 hover:border-green-400/30'
                   )}
-                </div>
-              </label>
+                  whileHover={{ scale: 1.01, y: -1 }}
+                  whileTap={{ scale: 0.99 }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={engines.includes(engine.id)}
+                    onChange={(e) => setEngines(e.target.checked ? [...engines, engine.id] : engines.filter((id) => id !== engine.id))}
+                    className="w-4 h-4 text-green-500 border-white/20 rounded focus:ring-green-500"
+                  />
+                  <div className="flex-1">
+                    <span className="font-medium text-[var(--text-primary)]">{engine.name}</span>
+                    {engine.requiresKey && (
+                      <span className="ml-2 text-xs text-orange-400">(requires API key)</span>
+                    )}
+                  </div>
+                </motion.label>
+              </StaggerItem>
             ))}
-          </div>
-        </div>
+          </StaggerContainer>
+        </motion.div>
 
         {/* Options */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <label className={clsx(
-            'flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors',
-            extractExif ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-600'
-          )}>
-            <input
-              type="checkbox"
-              checked={extractExif}
-              onChange={(e) => setExtractExif(e.target.checked)}
-              className="w-4 h-4 text-primary-600 border-dark-300 rounded focus:ring-primary-500"
-            />
-            <div>
-              <Camera className="w-5 h-5 text-dark-400" />
-              <span className="ml-2 font-medium text-dark-900 dark:text-white">Extract EXIF</span>
-              <p className="text-xs text-dark-500 dark:text-dark-400">GPS, camera info, timestamps</p>
-            </div>
-          </label>
-
-          <label className={clsx(
-            'flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors',
-            extractFaces ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-600'
-          )}>
-            <input
-              type="checkbox"
-              checked={extractFaces}
-              onChange={(e) => setExtractFaces(e.target.checked)}
-              className="w-4 h-4 text-primary-600 border-dark-300 rounded focus:ring-primary-500"
-            />
-            <div>
-              <div className="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                <span className="text-xs font-bold text-primary-600 dark:text-primary-400">👤</span>
-              </div>
-              <span className="ml-2 font-medium text-dark-900 dark:text-white">Face Detection</span>
-              <p className="text-xs text-dark-500 dark:text-dark-400">Find matching profiles</p>
-            </div>
-          </label>
-
-          <label className={clsx(
-            'flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors',
-            perceptualHash ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-600'
-          )}>
-            <input
-              type="checkbox"
-              checked={perceptualHash}
-              onChange={(e) => setPerceptualHash(e.target.checked)}
-              className="w-4 h-4 text-primary-600 border-dark-300 rounded focus:ring-primary-500"
-            />
-            <div>
-              <Search className="w-5 h-5 text-dark-400" />
-              <span className="ml-2 font-medium text-dark-900 dark:text-white">Perceptual Hash</span>
-              <p className="text-xs text-dark-500 dark:text-dark-400">Find near-duplicate images</p>
-            </div>
-          </label>
-        </div>
+        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {[
+            {
+              id: 'exif',
+              label: 'Extract EXIF',
+              desc: 'GPS, camera info, timestamps',
+              icon: Camera,
+              color: 'cyan',
+              checked: extractExif,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setExtractExif(e.target.checked),
+            },
+            {
+              id: 'faces',
+              label: 'Face Detection',
+              desc: 'Find matching profiles',
+              icon: Shield,
+              color: 'purple',
+              checked: extractFaces,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setExtractFaces(e.target.checked),
+            },
+            {
+              id: 'phash',
+              label: 'Perceptual Hash',
+              desc: 'Find near-duplicate images',
+              icon: Target,
+              color: 'orange',
+              checked: perceptualHash,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => setPerceptualHash(e.target.checked),
+            },
+          ].map((opt) => (
+            <StaggerItem key={opt.id}>
+              <motion.label
+                className={clsx(
+                  'flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all duration-200',
+                  opt.checked
+                    ? `border-${opt.color}-500/50 bg-${opt.color}-500/10 shadow-[0_0_20px_rgba(0,240,255,0.1)]`
+                    : 'border-white/10 hover:border-green-400/30'
+                )}
+                whileHover={{ scale: 1.01, y: -1 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <input
+                  type="checkbox"
+                  checked={opt.checked}
+                  onChange={opt.onChange}
+                  className="w-4 h-4 text-green-500 border-white/20 rounded focus:ring-green-500"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <opt.icon className={`w-5 h-5 text-${opt.color}-400`} />
+                    <span className="font-medium text-[var(--text-primary)]">{opt.label}</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{opt.desc}</p>
+                </div>
+              </motion.label>
+            </StaggerItem>
+          ))}
+        </motion.div>
 
         {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading || (!file && !imageUrl.trim())}
-          className="btn-primary w-full py-3 text-lg"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Searching...
-            </>
-          ) : (
-            'Start Search'
-          )}
-        </button>
-      </form>
+        <motion.div variants={itemVariants}>
+          <NeonButton
+            type="submit"
+            disabled={loading || (!file && !imageUrl.trim())}
+            loading={loading}
+            leftIcon={<Zap className="w-5 h-5" />}
+            rightIcon={<Target className="w-5 h-5" />}
+            className="w-full"
+            size="lg"
+          >
+            Start Search
+          </NeonButton>
+        </motion.div>
+      </motion.form>
 
-      {/* Info */}
-      <div className="card p-6 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800">
-        <div className="flex gap-4">
-          <Image className="w-6 h-6 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
+      {/* Info Panel */}
+      <motion.div
+        variants={itemVariants}
+        className="glass-card p-6 border-green-500/20"
+        style={{ background: 'rgba(34,255,136,0.03)' }}
+      >
+        <motion.div className="flex gap-4">
+          <motion.div
+            className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg, var(--accent-green) 0%, var(--accent-cyan) 100%)' }}
+            animate={{ rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
+            <Image className="w-7 h-7 text-white" />
+          </motion.div>
           <div>
-            <h3 className="font-medium text-primary-800 dark:text-primary-300">Capabilities</h3>
-            <ul className="mt-2 text-sm text-primary-700 dark:text-primary-400 space-y-1">
-              <li>• EXIF metadata extraction (GPS, camera, timestamps)</li>
-              <li>• Perceptual hashing (pHash/dHash) for near-duplicate detection</li>
-              <li>• Face detection & embedding extraction for profile matching</li>
-              <li>• Multi-engine search: Google, Yandex, TinEye, Bing</li>
-              <li>• Results cached for faster repeated lookups</li>
-            </ul>
+            <motion.h3 className="font-medium text-green-400">Capabilities</motion.h3>
+            <motion.ul className="mt-2 text-sm text-[var(--text-secondary)] space-y-1.5" variants={listVariants}>
+              <motion.li variants={listItemVariants}>• EXIF metadata extraction (GPS, camera, timestamps)</motion.li>
+              <motion.li variants={listItemVariants}>• Perceptual hashing (pHash/dHash) for near-duplicate detection</motion.li>
+              <motion.li variants={listItemVariants}>• Face detection & embedding extraction for profile matching</motion.li>
+              <motion.li variants={listItemVariants}>• Multi-engine search: Google, Yandex, TinEye, Bing</motion.li>
+              <motion.li variants={listItemVariants}>• Results cached for faster repeated lookups</motion.li>
+            </motion.ul>
           </div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   )
 }

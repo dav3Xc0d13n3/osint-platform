@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useJobsStore } from '../stores/jobs'
 import { Loader2, CheckCircle, XCircle, Clock, Search, Image, Link2, ExternalLink, ChevronDown, Copy, Download, Shield, Globe, Link as LinkIcon } from 'lucide-react'

@@ -172,7 +172,7 @@ export const reducedVariants: Variants = {
 // Utility to conditionally apply reduced motion
 export const getVariants = (
   normal: Variants,
-  reduced = reducedVariants
+  _reduced = reducedVariants
 ): { variants: Variants; transition?: Variants['animate'] } => {
   // The actual prefers-reduced-motion check happens in components via useReducedMotion hook
   return { variants: normal }

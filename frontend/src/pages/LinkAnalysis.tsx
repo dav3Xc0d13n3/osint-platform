@@ -6,7 +6,7 @@ import { Link2, Search, Globe, Shield, Clock, Target, Zap as ZapIcon } from 'luc
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
 import { NeonButton, GlassCard, StaggerContainer, StaggerItem } from '../components/ui'
-import { itemVariants, containerVariants, listVariants } from '../lib/motion'
+import { itemVariants, containerVariants, listVariants, listItemVariants } from '../lib/motion'
 
 const options = [
   { key: 'expandShorteners', label: 'Expand URL Shorteners', desc: 'Resolve bit.ly, t.co, tinyurl, etc.', icon: Link2, color: 'cyan' },

@@ -6,7 +6,7 @@ import { Image, Upload, Camera, Search, X, Zap, Target, Shield } from 'lucide-re
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
 import { NeonButton, GlassCard, StaggerContainer, StaggerItem } from '../components/ui'
-import { itemVariants, containerVariants, listVariants } from '../lib/motion'
+import { itemVariants, containerVariants, listVariants, listItemVariants } from '../lib/motion'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']

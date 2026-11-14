@@ -6,7 +6,7 @@ import { Search, User, Globe, HelpCircle, Zap, Target } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
 import { NeonButton, GlassCard, StaggerItem } from '../components/ui'
-import { itemVariants, containerVariants, listVariants } from '../lib/motion'
+import { itemVariants, containerVariants, listVariants, listItemVariants } from '../lib/motion'
 
 const POPULAR_PLATFORMS = [
   'GitHub', 'Twitter', 'Instagram', 'LinkedIn', 'Facebook', 'Reddit', 'YouTube', 'TikTok',

@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../stores/auth'
-import { LayoutDashboard, Search, Image, Link2, Settings, LogOut, Menu, ChevronLeft, Shield, User } from 'lucide-react'
+import { LayoutDashboard, Search, Image, Link2, Settings, LogOut, Menu, ChevronLeft, Shield, Search as SearchIcon } from 'lucide-react'
 import { useState } from 'react'
 import { clsx } from 'clsx'
 
@@ -52,7 +52,6 @@ export default function Layout() {
   const currentUser = authType === 'admin' ? admin : user
   const userName = currentUser?.name || currentUser?.username || 'User'
   const userPrefix = authType === 'admin' ? 'ADMIN' : user?.keyPrefix
-  const userIcon = authType === 'admin' ? Shield : Search
   const userColor = authType === 'admin' ? 'text-purple-400 bg-purple-500/10' : 'text-primary-400 bg-primary-100/30 dark:bg-primary-900/30'
   const userBadgeColor = authType === 'admin' ? 'bg-purple-500/20 text-purple-400' : 'bg-primary-100/30 dark:bg-primary-900/30 text-primary-400'
 
@@ -198,7 +197,7 @@ export default function Layout() {
                 className={clsx('w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0', userColor)}
                 whileHover={{ scale: 1.1, rotate: 3 }}
               >
-                <userIcon className="w-5 h-5" />
+                {authType === 'admin' ? <Shield className="w-5 h-5" /> : <SearchIcon className="w-5 h-5" />}
               </motion.div>
               <AnimatePresence mode="wait">
                 {sidebarOpen && currentUser && (

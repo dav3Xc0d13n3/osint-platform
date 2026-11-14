@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, HTMLMotionProps } from 'framer-motion'
 import { ReactNode, forwardRef } from 'react'
 import { clsx } from 'clsx'
 import { neonRipple, hoverLift } from '../../lib/motion'
@@ -66,7 +66,7 @@ const sizeStyles = {
   xl: 'px-8 py-4 text-xl gap-3',
 }
 
-type NeonButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'ref'> & {
+interface NeonButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
   children?: ReactNode
   variant?: NeonButtonVariant
   size?: keyof typeof sizeStyles
@@ -75,8 +75,6 @@ type NeonButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'chil
   loading?: boolean
   className?: string
   fullWidth?: boolean
-  whileHover?: HTMLMotionProps<'button'>['whileHover']
-  whileTap?: HTMLMotionProps<'button'>['whileTap']
 }
 
 export const NeonButton = forwardRef<HTMLButtonElement, NeonButtonProps>(

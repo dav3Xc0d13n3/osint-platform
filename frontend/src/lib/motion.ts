@@ -1,4 +1,4 @@
-import { Variants } from 'framer-motion'
+import { Variants, Transition } from 'framer-motion'
 
 /**
  * Shared motion variants for consistent animations across the app.
@@ -14,7 +14,7 @@ export const pageVariants: Variants = {
 
 export const pageTransition = {
   type: 'tween',
-  ease: [0.25, 0.46, 0.45, 0.94],
+  ease: [0.25, 0.46, 0.45, 0.94] as const,
   duration: 0.35,
 }
 
@@ -41,7 +41,7 @@ export const itemVariants: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const },
   },
 }
 
@@ -50,7 +50,7 @@ export const itemVariantsSlide: Variants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const },
   },
 }
 
@@ -65,7 +65,7 @@ export const listItemVariants: Variants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const },
   },
 }
 
@@ -104,13 +104,14 @@ export const pulseVariants: Variants = {
   animate: {
     opacity: [0.6, 1, 0.6],
     scale: [1, 1.05, 1],
+    transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' as const },
   },
 }
 
 export const blinkVariants: Variants = {
   initial: { opacity: 0 },
-  animate: { opacity: [0, 1, 0] },
-  transition: { duration: 1, repeat: Infinity, ease: 'easeInOut' },
+  animate: { opacity: [0, 1, 0] as const },
+  transition: { duration: 1, repeat: Infinity, ease: 'easeInOut' as const },
 }
 
 // Counter animation
@@ -118,7 +119,7 @@ export const countUp = (target: number, duration = 1.2) => ({
   hidden: { value: 0 },
   visible: {
     value: target,
-    transition: { duration, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration, ease: [0.25, 0.46, 0.45, 0.94] as const },
   },
 })
 
@@ -148,8 +149,8 @@ export const neonRipple = {
 export const shimmerVariants: Variants = {
   initial: { backgroundPosition: '-200% 0' },
   animate: {
-    backgroundPosition: ['200% 0', '-200% 0'],
-    transition: { duration: 1.5, repeat: Infinity, ease: 'linear' },
+    backgroundPosition: ['200% 0', '-200% 0'] as const,
+    transition: { duration: 1.5, repeat: Infinity, ease: 'linear' as const },
   },
 }
 
@@ -158,7 +159,7 @@ export const progressVariants = (progress: number): Variants => ({
   hidden: { scaleX: 0 },
   visible: {
     scaleX: progress / 100,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as const },
   },
 })
 
@@ -173,7 +174,7 @@ export const reducedVariants: Variants = {
 export const getVariants = (
   normal: Variants,
   _reduced = reducedVariants
-): { variants: Variants; transition?: Variants['animate'] } => {
+): { variants: Variants; transition?: Transition } => {
   // The actual prefers-reduced-motion check happens in components via useReducedMotion hook
   return { variants: normal }
 }

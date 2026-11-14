@@ -1,6 +1,8 @@
 # Core Configuration
+import json
 from functools import lru_cache
-from typing import List
+from typing import List, Union
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,8 +30,30 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     API_KEY_HEADER: str = "X-API-Key"
 
-    # CORS
+    # CORS - accepts JSON array or comma-separated string
     CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Union[str, List[str], None]) -> List[str]:
+        if v is None or v == "":
+            return ["http://localhost:3000"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return ["http://localhost:3000"]
+            # Try JSON first
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return [str(item).strip() for item in parsed if item]
+            except json.JSONDecodeError:
+                pass
+            # Fallback: comma-separated
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return ["http://localhost:3000"]
 
     # Rate Limiting
     DEFAULT_RATE_LIMIT: str = "100/minute"

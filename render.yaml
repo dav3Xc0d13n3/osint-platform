@@ -28,7 +28,7 @@ services:
       - key: DEBUG
         value: "false"
       - key: CORS_ORIGINS
-        value: "https://osint-frontend-gktj.onrender.com"
+        value: '["https://osint-frontend-gktj.onrender.com"]'
       - key: API_V1_PREFIX
         value: "/api/v1"
       # Optional external API keys - add in Render dashboard

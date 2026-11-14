@@ -110,8 +110,10 @@ export const pulseVariants: Variants = {
 
 export const blinkVariants: Variants = {
   initial: { opacity: 0 },
-  animate: { opacity: [0, 1, 0] as const },
-  transition: { duration: 1, repeat: Infinity, ease: 'easeInOut' as const },
+  animate: {
+    opacity: [0, 1, 0] as const,
+    transition: { duration: 1, repeat: Infinity, ease: 'easeInOut' as const },
+  },
 }
 
 // Counter animation

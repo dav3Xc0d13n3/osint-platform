@@ -30,8 +30,8 @@ def upgrade() -> None:
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.Column('last_used', sa.DateTime(timezone=True), nullable=True),
     )
-    op.create_index('ix_api_keys_key_prefix', 'api_keys', ['key_prefix'])
-    op.create_index('ix_api_keys_is_active', 'api_keys', ['is_active'])
+    op.create_index('ix_api_keys_key_prefix', 'api_keys', ['key_prefix'], if_not_exists=True)
+    op.create_index('ix_api_keys_is_active', 'api_keys', ['is_active'], if_not_exists=True)
 
     # Jobs table
     op.create_table(
@@ -48,12 +48,30 @@ def upgrade() -> None:
         sa.Column('started_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True),
     )
-    op.create_index('ix_jobs_api_key_id', 'jobs', ['api_key_id'])
-    op.create_index('ix_jobs_status', 'jobs', ['status'])
-    op.create_index('ix_jobs_created_at', 'jobs', ['created_at'])
+    op.create_index('ix_jobs_api_key_id', 'jobs', ['api_key_id'], if_not_exists=True)
+    op.create_index('ix_jobs_status', 'jobs', ['status'], if_not_exists=True)
+    op.create_index('ix_jobs_created_at', 'jobs', ['created_at'], if_not_exists=True)
+
+    # Admin Users table
+    op.create_table(
+        'admin_users',
+        sa.Column('id', UUID(as_uuid=True), primary_key=True),
+        sa.Column('username', sa.String(50), unique=True, nullable=False),
+        sa.Column('email', sa.String(100), unique=True, nullable=False),
+        sa.Column('password_hash', sa.String(255), nullable=False),
+        sa.Column('full_name', sa.String(100), nullable=True),
+        sa.Column('is_active', sa.Boolean(), default=True, nullable=False),
+        sa.Column('is_superuser', sa.Boolean(), default=False, nullable=False),
+        sa.Column('last_login', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False),
+    )
+    op.create_index('ix_admin_users_username', 'admin_users', ['username'], if_not_exists=True)
+    op.create_index('ix_admin_users_email', 'admin_users', ['email'], if_not_exists=True)
 
 
 def downgrade() -> None:
+    op.drop_table('admin_users')
     op.drop_table('jobs')
     op.drop_table('api_keys')
     op.execute('DROP TYPE jobtype')

@@ -83,7 +83,7 @@ export default function UsernameSearch() {
           <div className="text-xs text-[var(--text-muted)]">Platforms</div>
         </GlassCard>
         <GlassCard variant="bordered" padding="sm" className="text-center">
-          <div className="text-2xl font-mono font-bold text-green-400"><30s</div>
+          <div className="text-2xl font-mono font-bold text-green-400">{'<30s'}</div>
           <div className="text-xs text-[var(--text-muted)]">Avg Time</div>
         </GlassCard>
         <GlassCard variant="bordered" padding="sm" className="text-center">

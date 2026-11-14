@@ -38,6 +38,22 @@ export function StatusDot({
   const pulse = usePulse(2000)
   const blink = useBlink(1000)
 
+  const getAnimate = () => {
+    if (status === 'online' && showPulse && pulse) {
+      return { scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }
+    }
+    if (status === 'degraded' && showBlink && blink) {
+      return { opacity: [1, 0.3, 1] }
+    }
+    return undefined
+  }
+
+  const getTransition = () => ({
+    duration: status === 'online' ? 2 : 1,
+    repeat: Infinity,
+    ease: 'easeInOut',
+  })
+
   return (
     <div className={clsx('flex items-center gap-1.5', className)}>
       <motion.span
@@ -48,23 +64,12 @@ export function StatusDot({
           status === 'online' && 'animate-pulse',
         )}
         style={{
-          // Add custom glow for online status
           boxShadow: status === 'online'
             ? '0 0 8px currentColor, 0 0 16px currentColor, 0 0 24px currentColor'
             : undefined,
         }}
-        animate={
-          status === 'online' && showPulse && pulse
-            ? { scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }
-            : status === 'degraded' && showBlink && blink
-            ? { opacity: [1, 0.3, 1] }
-            : undefined
-        }
-        transition={{
-          duration: status === 'online' ? 2 : 1,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
+        animate={getAnimate()}
+        transition={getTransition()}
       />
       {label && (
         <span className={clsx(
@@ -77,8 +82,9 @@ export function StatusDot({
           status === 'degraded' && 'text-yellow-400',
           status === 'unknown' && 'text-dark-400',
         )}>
-        {label}
-      </span>}
+          {label}
+        </span>
+      )}
     </div>
   )
 }

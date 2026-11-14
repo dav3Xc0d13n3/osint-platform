@@ -97,7 +97,7 @@ export default function LinkAnalysis() {
           <div className="text-xs text-[var(--text-muted)]">Modules</div>
         </GlassCard>
         <GlassCard variant="bordered" padding="sm" className="text-center">
-          <div className="text-2xl font-mono font-bold text-cyan-400"><5s</div>
+          <div className="text-2xl font-mono font-bold text-cyan-400">{'<5s'}</div>
           <div className="text-xs text-[var(--text-muted)]">Avg Time</div>
         </GlassCard>
         <GlassCard variant="bordered" padding="sm" className="text-center">

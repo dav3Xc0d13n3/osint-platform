@@ -92,14 +92,61 @@ async def delete_job(
 keys_router = APIRouter(prefix="/keys", tags=["keys"])
 
 
+@keys_router.post("/bootstrap", response_model=APIKeyResponse, status_code=status.HTTP_201_CREATED)
+async def bootstrap_first_api_key(
+    request: APIKeyCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    """Bootstrap the first API key (no auth required). Only works if no API keys exist."""
+    from app.core.security import generate_api_key
+    from datetime import datetime, timedelta, UTC
+    from sqlalchemy import select
+
+    # Check if any API keys already exist
+    result = await db.execute(select(APIKey))
+    existing_keys = result.scalars().all()
+    if existing_keys:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bootstrap disabled: API keys already exist. Use authenticated /keys endpoint."
+        )
+
+    plain_key, hashed_key = generate_api_key()
+    expires_at = None
+    if request.expires_in_days:
+        expires_at = datetime.now(UTC) + timedelta(days=request.expires_in_days)
+
+    new_key = APIKey(
+        name=request.name,
+        key_hash=hashed_key,
+        key_prefix=plain_key[:12],
+        rate_limit=request.rate_limit,
+        expires_at=expires_at,
+    )
+    db.add(new_key)
+    await db.commit()
+    await db.refresh(new_key)
+
+    return APIKeyResponse(
+        id=new_key.id,
+        name=new_key.name,
+        key_prefix=new_key.key_prefix,
+        plain_key=plain_key,  # Only returned on creation
+        is_active=new_key.is_active,
+        rate_limit=new_key.rate_limit,
+        expires_at=new_key.expires_at,
+        created_at=new_key.created_at,
+        last_used=new_key.last_used,
+    )
+
+
 @keys_router.post("/", response_model=APIKeyResponse, status_code=status.HTTP_201_CREATED)
 async def create_api_key(
     request: APIKeyCreate,
     api_key = Depends(get_current_api_key),
     db: AsyncSession = Depends(get_db),
 ):
-    """Create a new API key (admin only - first key or key with admin flag)"""
-    # In production, add admin check here
+    """Create a new API key (authenticated)"""
     from app.core.security import generate_api_key
     from datetime import datetime, timedelta, UTC
 

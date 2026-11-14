@@ -2,6 +2,7 @@
 import json
 from functools import lru_cache
 from typing import List, Union
+from urllib.parse import urlparse, urlunparse
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -19,6 +20,38 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     DATABASE_POOL_SIZE: int = 10
     DATABASE_MAX_OVERFLOW: int = 20
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalize_database_url(cls, v: str) -> str:
+        """Normalize DATABASE_URL to use asyncpg driver for async SQLAlchemy.
+        
+        Render provides postgresql:// or postgres:// URLs. We need postgresql+asyncpg://
+        for create_async_engine. Preserve all other components including SSL params.
+        """
+        if not v or not isinstance(v, str):
+            return v
+        
+        parsed = urlparse(v.strip())
+        
+        # Normalize scheme: postgres:// -> postgresql://, then add +asyncpg
+        scheme = parsed.scheme.lower()
+        if scheme in ("postgres", "postgresql"):
+            # Rebuild URL with asyncpg driver
+            new_scheme = "postgresql+asyncpg"
+            # Preserve netloc (user:pass@host:port), path, params, query, fragment
+            normalized = urlunparse((
+                new_scheme,
+                parsed.netloc,
+                parsed.path,
+                parsed.params,
+                parsed.query,
+                parsed.fragment
+            ))
+            return normalized
+        
+        # If already postgresql+asyncpg:// or other scheme, return as-is
+        return v
 
     # Redis
     REDIS_URL: str

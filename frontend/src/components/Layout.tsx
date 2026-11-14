@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../stores/auth'
-import { LayoutDashboard, Search, Image, Link2, Settings, LogOut, Menu, ChevronLeft } from 'lucide-react'
+import { LayoutDashboard, Search, Image, Link2, Settings, LogOut, Menu, ChevronLeft, Shield, User } from 'lucide-react'
 import { useState } from 'react'
 import { clsx } from 'clsx'
 
@@ -38,7 +38,7 @@ const pageTransition = {
 }
 
 export default function Layout() {
-  const { user, logout } = useAuthStore()
+  const { user, admin, logout, authType } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -48,6 +48,13 @@ export default function Layout() {
     logout()
     navigate('/login')
   }
+
+  const currentUser = authType === 'admin' ? admin : user
+  const userName = currentUser?.name || currentUser?.username || 'User'
+  const userPrefix = authType === 'admin' ? 'ADMIN' : user?.keyPrefix
+  const userIcon = authType === 'admin' ? Shield : Search
+  const userColor = authType === 'admin' ? 'text-purple-400 bg-purple-500/10' : 'text-primary-400 bg-primary-100/30 dark:bg-primary-900/30'
+  const userBadgeColor = authType === 'admin' ? 'bg-purple-500/20 text-purple-400' : 'bg-primary-100/30 dark:bg-primary-900/30 text-primary-400'
 
   const sidebarAnimation = mobileMenuOpen
     ? (sidebarOpen ? 'mobileOpen' : 'mobileClosed')
@@ -188,13 +195,13 @@ export default function Layout() {
               whileHover={{ x: sidebarOpen ? 4 : 0 }}
             >
               <motion.div
-                className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0"
+                className={clsx('w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0', userColor)}
                 whileHover={{ scale: 1.1, rotate: 3 }}
               >
-                <Search className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                <userIcon className="w-5 h-5" />
               </motion.div>
               <AnimatePresence mode="wait">
-                {sidebarOpen && user && (
+                {sidebarOpen && currentUser && (
                   <motion.div
                     key="user-info"
                     initial={{ opacity: 0, x: -20, height: 0 }}
@@ -202,8 +209,10 @@ export default function Layout() {
                     exit={{ opacity: 0, x: 20, height: 0 }}
                     className="flex-1 min-w-0 overflow-hidden"
                   >
-                    <p className="text-sm font-medium text-dark-900 dark:text-white truncate">{user.name}</p>
-                    <p className="text-xs text-dark-500 dark:text-dark-400 font-mono">{user.keyPrefix}...</p>
+                    <p className="text-sm font-medium text-dark-900 dark:text-white truncate">{userName}</p>
+                    <p className="text-xs font-mono">
+                      <span className={clsx('badge', userBadgeColor)}>{userPrefix}</span>
+                    </p>
                   </motion.div>
                 )}
               </AnimatePresence>

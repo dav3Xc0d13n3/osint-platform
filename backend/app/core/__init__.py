@@ -6,9 +6,13 @@ from app.core.security import (
     verify_token,
     hash_api_key,
     verify_api_key,
+    hash_password,
+    verify_password,
     generate_api_key,
     get_current_api_key,
     get_optional_api_key,
+    get_current_admin,
+    get_optional_admin,
 )
 from app.core.rate_limit import init_rate_limiter
 
@@ -24,8 +28,12 @@ __all__ = [
     "verify_token",
     "hash_api_key",
     "verify_api_key",
+    "hash_password",
+    "verify_password",
     "generate_api_key",
     "get_current_api_key",
     "get_optional_api_key",
+    "get_current_admin",
+    "get_optional_admin",
     "init_rate_limiter",
 ]

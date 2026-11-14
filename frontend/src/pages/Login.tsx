@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../stores/auth'
-import { Search, Key, Loader2, Eye, EyeOff, Shield, Sparkles, ArrowRight, CheckCircle, AlertTriangle, Terminal } from 'lucide-react'
+import { Search, Key, Loader2, Eye, EyeOff, Shield, Sparkles, ArrowRight, CheckCircle, AlertTriangle, Terminal, User, Lock, UserPlus, RotateCcw } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { apiInstance as api } from '../services/api'
 import { NeonButton, GlassCard } from '../components/ui'
 import { useReducedMotion, usePulse } from '../lib/hooks'
+
+type LoginMode = 'login' | 'bootstrap' | 'admin'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -14,12 +16,16 @@ export default function Login() {
   const [apiKey, setApiKey] = useState('')
   const [loading, setLoading] = useState(false)
   const [showKey, setShowKey] = useState(false)
-  const [mode, setMode] = useState<'login' | 'bootstrap'>('login')
+  const [mode, setMode] = useState<LoginMode>('login')
   const [bootstrapName, setBootstrapName] = useState('admin')
   const [bootstrapRateLimit, setBootstrapRateLimit] = useState('1000/minute')
   const [bootstrapExpires, setBootstrapExpires] = useState(30)
   const [generatedKey, setGeneratedKey] = useState<string | null>(null)
   const [copySuccess, setCopySuccess] = useState(false)
+  // Admin login state
+  const [adminUsername, setAdminUsername] = useState('')
+  const [adminPassword, setAdminPassword] = useState('')
+  const [showAdminPassword, setShowAdminPassword] = useState(false)
   const reduced = useReducedMotion()
   const pulse = usePulse(2000)
 
@@ -34,6 +40,30 @@ export default function Login() {
       navigate('/')
     } catch (error: any) {
       toast.error(error.response?.data?.detail || 'Invalid API key', { icon: '⚠️' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!adminUsername.trim() || !adminPassword.trim()) return
+
+    setLoading(true)
+    try {
+      const response = await api.post('/admin/login', {
+        username: adminUsername.trim(),
+        password: adminPassword,
+      })
+      const { access_token } = response.data
+      // Store token in localStorage and auth store
+      localStorage.setItem('osint-admin-token', access_token)
+      // Update auth store to use admin token
+      useAuthStore.getState().setAdminToken(access_token)
+      toast.success('Admin login successful', { icon: '🛡️' })
+      navigate('/')
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Invalid credentials', { icon: '⚠️' })
     } finally {
       setLoading(false)
     }
@@ -203,7 +233,7 @@ export default function Login() {
                 variants={itemVariants}
                 transition={{ delay: 0.1 }}
               >
-                {mode === 'login' ? 'Initialize session with API key' : 'Bootstrap first API key'}
+                {mode === 'login' ? 'Enter your API key to continue' : mode === 'admin' ? 'Admin sign in with credentials' : 'Bootstrap first API key'}
               </motion.p>
             </motion.div>
 
@@ -215,7 +245,7 @@ export default function Login() {
             >
               <motion.button
                 onClick={() => setMode('login')}
-                className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 ${
                   mode === 'login'
                     ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(0,240,255,0.2)]'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
@@ -223,23 +253,38 @@ export default function Login() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Terminal className="w-4 h-4 inline mr-1" /> Sign In
+                <Key className="w-4 h-4" />
+                API Key
               </motion.button>
               <motion.button
-                onClick={() => { setMode('bootstrap'); setGeneratedKey(null); }}
-                className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  mode === 'bootstrap'
+                onClick={() => setMode('admin')}
+                className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                  mode === 'admin'
                     ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-[0_0_20px_rgba(139,92,246,0.3)]'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                 }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Sparkles className="w-4 h-4 inline mr-1" /> Bootstrap
+                <Shield className="w-4 h-4" />
+                Admin
+              </motion.button>
+              <motion.button
+                onClick={() => { setMode('bootstrap'); setGeneratedKey(null); }}
+                className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                  mode === 'bootstrap'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-[0_0_20px_rgba(255,170,0,0.3)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Sparkles className="w-4 h-4" />
+                Bootstrap
               </motion.button>
             </motion.div>
 
-            {/* Login Form */}
+            {/* API Key Login Form */}
             <AnimatePresence mode="wait">
               {mode === 'login' && (
                 <motion.form
@@ -270,7 +315,7 @@ export default function Login() {
                       <motion.button
                         type="button"
                         onClick={() => setShowKey(!showKey)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--accent-cyan)] transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-cyan-400 transition-colors"
                         aria-label={showKey ? 'Hide key' : 'Show key'}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
@@ -294,6 +339,84 @@ export default function Login() {
                   >
                     Sign In
                   </NeonButton>
+                </motion.form>
+              )}
+
+              {/* Admin Login Form */}
+              {mode === 'admin' && (
+                <motion.form
+                  key="admin"
+                  onSubmit={handleAdminLogin}
+                  variants={itemVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                  className="space-y-6"
+                >
+                  <motion.div>
+                    <label htmlFor="adminUsername" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                      Username
+                    </label>
+                    <motion.div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" aria-hidden="true" />
+                      <input
+                        id="adminUsername"
+                        type="text"
+                        value={adminUsername}
+                        onChange={(e) => setAdminUsername(e.target.value)}
+                        className="neon-input pl-10"
+                        placeholder="admin"
+                        autoComplete="username"
+                        disabled={loading}
+                      />
+                    </motion.div>
+                  </motion.div>
+
+                  <motion.div>
+                    <label htmlFor="adminPassword" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                      Password
+                    </label>
+                    <motion.div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" aria-hidden="true" />
+                      <input
+                        id="adminPassword"
+                        type={showAdminPassword ? 'text' : 'password'}
+                        value={adminPassword}
+                        onChange={(e) => setAdminPassword(e.target.value)}
+                        className="neon-input pl-10 pr-12"
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        disabled={loading}
+                      />
+                      <motion.button
+                        type="button"
+                        onClick={() => setShowAdminPassword(!showAdminPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-cyan-400 transition-colors"
+                        aria-label={showAdminPassword ? 'Hide password' : 'Show password'}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        {showAdminPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </motion.button>
+                    </motion.div>
+                  </motion.div>
+
+                  <NeonButton
+                    type="submit"
+                    disabled={loading}
+                    loading={loading}
+                    leftIcon={<Shield className="w-5 h-5" />}
+                    rightIcon={<ArrowRight className="w-5 h-5" />}
+                    className="w-full"
+                    size="lg"
+                    variant="primary"
+                  >
+                    Sign In as Admin
+                  </NeonButton>
+
+                  <motion.p className="text-center text-xs text-[var(--text-muted)]">
+                    Admin access only. Users sign in with API keys.
+                  </motion.p>
                 </motion.form>
               )}
 
@@ -378,7 +501,7 @@ export default function Login() {
                   </NeonButton>
 
                   <motion.p className="text-center text-xs text-[var(--text-muted)]">
-                    Only works if no API keys exist in the database.
+                    This only works if no API keys exist in the database.
                   </motion.p>
                 </motion.form>
               )}
@@ -448,7 +571,7 @@ export default function Login() {
                   </div>
 
                   <motion.p className="text-center text-xs text-[var(--text-muted)]">
-                    Save this key securely. Create more keys in Settings after login.
+                    Save this key securely. You can create more keys in Settings after logging in.
                   </motion.p>
                 </motion.div>
               )}
@@ -464,9 +587,9 @@ export default function Login() {
                 OSINT Platform — Social Media & Web Intelligence
               </motion.p>
               <motion.p className="text-xs text-[var(--text-muted)] mt-1">
-                <span className="font-mono text-cyan-400">asyncpg</span> •
-                <span className="font-mono text-purple-400">FastAPI</span> •
-                <span className="font-mono text-cyan-400">React</span> •
+                <span className="font-mono text-cyan-400">asyncpg</span> •{' '}
+                <span className="font-mono text-purple-400">FastAPI</span> •{' '}
+                <span className="font-mono text-cyan-400">React</span> •{' '}
                 <span className="font-mono text-pink-400">Framer Motion</span>
               </motion.p>
             </motion.div>

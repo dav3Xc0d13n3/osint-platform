@@ -1,13 +1,13 @@
 import { useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useJobsStore } from '../stores/jobs'
 import { useAuthStore } from '../stores/auth'
 import { Search, Image, Link2, Clock, CheckCircle, XCircle, Loader2, Plus, ExternalLink, TrendingUp, Activity, Database, Zap, BarChart2, Target } from 'lucide-react'
 import { clsx } from 'clsx'
 import { formatDistanceToNow } from 'date-fns'
 import { GlassCard, NeonButton, StatCard, StatusDot, ServiceStatusBar, SkeletonCard, StaggerContainer, StaggerItem } from '../components/ui'
-import { containerVariants, itemVariants, listVariants, listItemVariants, cardVariants, progressVariants } from '../lib/motion'
+import { containerVariants, itemVariants, listVariants, listItemVariants, cardVariants } from '../lib/motion'
 
 const jobTypeConfig = {
   username: { icon: Search, label: 'Username', color: 'cyan', iconColor: 'cyan' },

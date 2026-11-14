@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useJobsStore } from '../stores/jobs'
-import { Loader2, CheckCircle, XCircle, Clock, Search, Image, Link2, ExternalLink, ChevronDown, Copy, Download, Shield, Globe, Link as LinkIcon, Zap, Target } from 'lucide-react'
+import { Loader2, CheckCircle, XCircle, Clock, Search, Image, Link2, ExternalLink, ChevronDown, Copy, Download, Shield, Globe, Link as LinkIcon } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { clsx } from 'clsx'
 import { NeonButton, GlassCard, StaggerContainer, StaggerItem } from '../components/ui'
-import { itemVariants, cardVariants, containerVariants, listVariants, listItemVariants, progressVariants } from '../lib/motion'
+import { itemVariants, containerVariants, listVariants, listItemVariants } from '../lib/motion'
 
 const jobTypeConfig = {
   username: { icon: Search, label: 'Username Search', color: 'cyan' },
@@ -536,11 +536,7 @@ export default function JobResults() {
         >
           <motion.div className="flex items-center justify-between mb-2">
             <motion.span className="text-sm font-medium text-[var(--text-secondary)]">Progress</motion.span>
-            <motion.span
-              className="text-sm font-mono text-cyan-400"
-              animate={{ text: [0, job.progress] }}
-              transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-            >
+            <motion.span className="text-sm font-mono text-cyan-400">
               {job.progress}%
             </motion.span>
           </motion.div>

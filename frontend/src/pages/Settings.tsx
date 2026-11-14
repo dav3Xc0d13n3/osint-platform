@@ -5,7 +5,7 @@ import { User, Key, Plus, Loader2, Check, Bell, Shield, Palette, Moon, LogOut, C
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import { apiInstance as api } from '../services/api'
-import { NeonButton, GlassCard, StaggerContainer, StaggerItem } from '../components/ui'
+import { NeonButton, StaggerContainer, StaggerItem } from '../components/ui'
 import { containerVariants, itemVariants, listVariants, listItemVariants, modalVariants, backdropVariants } from '../lib/motion'
 
 export default function Settings() {

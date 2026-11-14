@@ -67,7 +67,7 @@ const sizeStyles = {
 }
 
 interface NeonButtonProps extends Omit<HTMLMotionProps<'button'>, 'whileHover' | 'whileTap' | 'type'>, ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode
+  children?: ReactNode
   variant?: NeonButtonVariant
   size?: keyof typeof sizeStyles
   leftIcon?: ReactNode

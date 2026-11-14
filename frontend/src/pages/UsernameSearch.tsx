@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useJobsStore } from '../stores/jobs'
 import { useNavigate } from 'react-router-dom'
-import { Search, Loader2, User, Globe, HelpCircle, Zap, Target, Shield } from 'lucide-react'
+import { Search, User, Globe, HelpCircle, Zap, Target } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
-import { NeonButton, GlassCard, StaggerContainer, StaggerItem } from '../components/ui'
-import { itemVariants, cardVariants, containerVariants, listVariants } from '../lib/motion'
+import { NeonButton, GlassCard, StaggerItem } from '../components/ui'
+import { itemVariants, containerVariants, listVariants } from '../lib/motion'
 
 const POPULAR_PLATFORMS = [
   'GitHub', 'Twitter', 'Instagram', 'LinkedIn', 'Facebook', 'Reddit', 'YouTube', 'TikTok',

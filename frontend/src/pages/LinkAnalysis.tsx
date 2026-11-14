@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useJobsStore } from '../stores/jobs'
 import { useNavigate } from 'react-router-dom'
-import { Link2, Loader2, Search, Globe, Shield, Clock, Zap, Target, Zap as ZapIcon } from 'lucide-react'
+import { Link2, Search, Globe, Shield, Clock, Target, Zap as ZapIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
 import { NeonButton, GlassCard, StaggerContainer, StaggerItem } from '../components/ui'
-import { itemVariants, cardVariants, containerVariants, listVariants } from '../lib/motion'
+import { itemVariants, containerVariants, listVariants } from '../lib/motion'
 
 const options = [
   { key: 'expandShorteners', label: 'Expand URL Shorteners', desc: 'Resolve bit.ly, t.co, tinyurl, etc.', icon: Link2, color: 'cyan' },
